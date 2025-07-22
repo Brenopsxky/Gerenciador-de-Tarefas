@@ -61,7 +61,7 @@ Este projeto representa uma **Versão Mínima Viável (MVP)** do Gerenciador de 
 ## 👨‍💻 Autor
 
 Breno Lisboa (Brenopsxky)
-[https://www.linkedin.com/in/blisboa-tech/](https://www.linkedin.com/in/blisboa-tech/)
+[https://www.linkedin.com/in/blisboa-tech/](https://www.linkedin.com/in/blisboa-tech/)  
 [blisboa.tech@gmail.com](mailto:blisboa.tech@gmail.com)
 
 ---
