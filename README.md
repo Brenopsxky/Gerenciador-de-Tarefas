@@ -15,7 +15,7 @@ Este é um simples gerenciador de tarefas desenvolvido em Python, operado via li
 
 ---
 
-## 🚀 Como Usar
+## 🏁 Como Usar
 
 1.  **Clone o Repositório:**
     ```bash
@@ -40,7 +40,7 @@ Este é um simples gerenciador de tarefas desenvolvido em Python, operado via li
 
 ---
 
-## 📊 Estrutura Lógica (Fluxograma)
+## 📊 Estrutura Lógica (Fluxograma) - Em atualização
 
 A lógica central do programa segue o seguinte fluxo principal:
 
@@ -48,20 +48,35 @@ A lógica central do programa segue o seguinte fluxo principal:
 
 ---
 
+## 🚀 Status Atual do Projeto
+
+Este projeto de Gerenciador de Tarefas acaba de receber uma grande atualização! As seguintes melhorias foram **implementadas e fazem parte do commit atual**:
+
+* **Refatoração para POO (Programação Orientada a Objetos):**
+    * As tarefas agora são representadas por **objetos da classe `Tarefa`**, encapsulando `id`, `descrição` e `status de conclusão`.
+    * A lógica de gerenciamento foi centralizada na **classe `GerenciadorDeTarefas`**, que agora detém a lista de tarefas e controla suas operações.
+* **Persistência Automática de Dados:** 
+    * Todas as alterações nas tarefas são **salvas automaticamente** no arquivo `tarefas.json`.
+    * As tarefas são **carregadas automaticamente** desse arquivo ao iniciar o programa, garantindo que nenhum dado seja perdido entre as sessões.
+
+---
+
 ## 📈 Melhorias Futuras / Próximos Passos (MVP e Evolução)
 
 Este projeto representa uma **Versão Mínima Viável (MVP)** do Gerenciador de Tarefas. As próximas melhorias planejadas incluem:
 
-* **Persistência de Dados Aprimorada:** Garantir que todas as alterações (como exclusões) sejam salvas automaticamente ou que o usuário seja alertado para salvar antes de sair, evitando perda de dados.
-* **Melhorias na Interface do Usuário (UX/UI):** Reduzir a poluição visual no terminal e, futuramente, explorar a criação de uma **Interface Gráfica do Usuário (GUI)** para uma experiência mais interativa.
-* **Novas Funcionalidades:** Adicionar opções como prioridade de tarefas, datas de vencimento, filtragem e categorias.
+* **Validação e Tratamento de Erros Robusto:** Aprimorar a validação de entradas do usuário e adicionar tratamento de exceções para garantir que o programa lide graciosamente com situações inesperadas (ex: entrada de texto onde se espera um número, arquivos de dados corrompidos).
+* **Melhorias na Interface do Usuário (Terminal UX/UI):** Reduzir a poluição visual, padronizar mensagens e, futuramente, explorar a criação de uma **Interface Gráfica do Usuário (GUI)** para uma experiência mais interativa.
+* **Novas Funcionalidades Essenciais:** Adicionar opções cruciais para um gerenciador de tarefas completo, como:
+    * **Edição de Tarefas:** Permitir a modificação da descrição de tarefas existentes.
+    * **Listagem Filtrada:** Capacidade de listar tarefas por status (concluídas/pendentes).
+* **Refatoração Contínua e Otimização:** Revisar e aprimorar o código existente para maior legibilidade, manutenção e eficiência.
 
 ---
 
 ## 👨‍💻 Autor
 
 Breno Lisboa (Brenopsxky)
-[https://www.linkedin.com/in/blisboa-tech/](https://www.linkedin.com/in/blisboa-tech/)  
-[blisboa.tech@gmail.com](mailto:blisboa.tech@gmail.com)
+[https://www.linkedin.com/in/blisboa-tech/](https://www.linkedin.com/in/blisboa-tech/ | [blisboa.tech@gmail.com](mailto:blisboa.tech@gmail.com)
 
 ---

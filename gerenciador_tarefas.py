@@ -1,141 +1,164 @@
 import json # Importar o módulo json para salvar/carregar dados
-import os # Importar o módulo os para verificar se o arquivo existe
+import os   # Importar o módulo os para verificar se o arquivo existe
 
-tarefas_global = [] # Lista global para armazenar todas as tarefas
+# Classe para representar uma única tarefa
+class Tarefa:
+    def __init__(self, id, descricao, concluida=False):
+        self.id = id
+        self.descricao = descricao
+        self.concluida = concluida
 
-# Definir o nome do arquivo onde as tarefas serão salvas
-NOME_ARQUIVO = "tarefas.json"
+# Classe principal para gerenciar as tarefas
+class GerenciadorDeTarefas:
+    def __init__(self):
+        self.tarefas = [] # Lista para armazenar objetos Tarefa
+        self.proximo_id = 1
+        self.NOME_ARQUIVO = "tarefas.json" # Nome do arquivo de persistência, agora atributo da classe
 
-def adicionar_tarefa():
-    """
-    Adiciona uma nova tarefa à lista de tarefas.
-    A tarefa é criada com status 'concluida' como False por padrão.
-    """
-    descricao = input("Digite a descrição da tarefa: ")
-    tarefa = {"dados_descricao": descricao, "concluida": False}
-    tarefas_global.append(tarefa)
-    print(f"Tarefa '{descricao}' adicionada com sucesso!")
+        # Tenta carregar as tarefas ao iniciar o gerenciador
+        self._carregar_tarefas() # Usamos um método "privado" para carregar no init
 
-def ver_tarefas():
-    """Exibe todas as tarefas com seu status de conclusão."""
-    if not tarefas_global:
-        print("Nenhuma tarefa cadastrada.")
-        return
-
-    print("\n--- SUAS tarefas ---")
-    for indice, tarefa in enumerate(tarefas_global):
-        status = "✅" if tarefa["concluida"] else "❌"
-        print(f"{indice + 1}. {status} {tarefa["dados_descricao"]}")
-    print("---------------------\n")
-
-def marcar_tarefa_concluida():
-    """Permite ao usuário marcar uma tarefa existente como concluída."""
-    ver_tarefas()
-
-    if not tarefas_global:
-        # Sai da função se não houver tarefas para evitar pedir input.
-        return
-
-    try:
-        num_tarefa = int(input("Digite o NÚMERO da tarefa que deseja marcar como CONCLUÍDA: "))
+    def _salvar_tarefas(self):
+        """Salva a lista de tarefas em um arquivo JSON."""
+        # Converte a lista de objetos Tarefa para uma lista de dicionários antes de salvar
+        dados_para_salvar = []
+        for tarefa in self.tarefas:
+            dados_para_salvar.append({
+                "id": tarefa.id,
+                "descricao": tarefa.descricao,
+                "concluida": tarefa.concluida
+            })
         
-        # Ajusta o número para o índice da lista (usuário digita 1, índice é 0)
-        indice_real = num_tarefa - 1 
+        try:
+            with open(self.NOME_ARQUIVO, 'w', encoding='utf-8') as file:
+                json.dump(dados_para_salvar, file, indent=4)
+        except IOError:
+            print(f"Erro: Não foi possível salvar as tarefas no arquivo '{self.NOME_ARQUIVO}'.")
 
-        if 0 <= indice_real < len(tarefas_global):
-            tarefas_global[indice_real]["concluida"] = True 
-            print(f"Tarefa '{tarefas_global[indice_real]['dados_descricao']}' marcada como CONCLUÍDA! ✅")
+    def _carregar_tarefas(self):
+        """Carrega as tarefas de um arquivo JSON."""
+        if os.path.exists(self.NOME_ARQUIVO):
+            try:
+                with open(self.NOME_ARQUIVO, 'r', encoding='utf-8') as file:
+                    dados = json.load(file)
+                    self.tarefas = [] # Limpa a lista antes de carregar
+                    maior_id = 0
+                    for item_json in dados:
+                        # Cria uma instância de Tarefa para cada dicionário carregado
+                        tarefa = Tarefa(
+                            id=item_json["id"],
+                            descricao=item_json["descricao"],
+                            concluida=item_json["concluida"]
+                        )
+                        self.tarefas.append(tarefa)
+                        if item_json["id"] > maior_id:
+                            maior_id = item_json["id"]
+                    self.proximo_id = maior_id + 1
+            except (IOError, json.JSONDecodeError):
+                print(f"Aviso: Não foi possível carregar as tarefas do arquivo '{self.NOME_ARQUIVO}'. Iniciando com lista vazia...")
+                self.tarefas = []
+                self.proximo_id = 1
         else:
-            print("Número de tarefa inválido. Tente novamente.")
-    except ValueError:
-        print("Entrada inválida. Por favor, digite um número.")
+            self.tarefas = []
+            self.proximo_id = 1
 
-def remover_tarefa():
-    """Permite ao usuário remover uma tarefa da lista."""
-    ver_tarefas()
+    def adicionar_tarefa(self):
+        """Adiciona uma nova tarefa à lista."""
+        descricao = input("Digite a descrição da nova tarefa: ")
+        if not descricao.strip(): # Verifica se a descrição não está vazia ou só com espaços
+            print("A descrição da tarefa não pode ser vazia.")
+            return
 
-    if not tarefas_global:
-        return
+        nova_tarefa = Tarefa(id=self.proximo_id, descricao=descricao)
+        self.tarefas.append(nova_tarefa)
+        print(f"Tarefa '{descricao}' adicionada com sucesso! (ID: {self.proximo_id})")
+        self.proximo_id += 1
+        self._salvar_tarefas() # Salva automaticamente após adicionar
 
-    try:
-        num_tarefa = int(input("Digite o NÚMERO da tarefa que deseja REMOVER: "))
-        indice_real = num_tarefa - 1
+    def ver_tarefas(self):
+        """Exibe todas as tarefas."""
+        if not self.tarefas:
+            print("Nenhuma tarefa para exibir.")
+            return
 
-        if 0 <= indice_real < len(tarefas_global):
-            tarefa_removida = tarefas_global.pop(indice_real)
-            print(f"Tarefa '{tarefa_removida['dados_descricao']}' REMOVIDA com sucesso!")
-        else:
-            print("Número de tarefa inválido. Certifique-se de digitar um número da lista.")
-    except ValueError:
-        print("Entrada inválida. Por favor, digite um número inteiro.")
+        print("\n--- Suas Tarefas ---")
+        for i, tarefa in enumerate(self.tarefas): # 'tarefa' aqui é um objeto Tarefa
+            status = "✅" if tarefa.concluida else "❌" # Acessa o atributo .concluida
+            # Acessa os atributos do objeto Tarefa usando '.'
+            print(f"{i + 1}. [ID: {tarefa.id}] {tarefa.descricao} {status}")
+        print("--------------------")
 
+    def marcar_tarefa_concluida(self):
+        """Permite ao usuário marcar uma tarefa existente como concluída."""
+        self.ver_tarefas() # Chama o método da própria instância
 
-def salvar_tarefas(tarefas):
-    """Salva a lista de tarefas em um arquivo JSON."""
-    try:
-        # Abre o arquivo em modo de escrita ('w') com codificação UTF-8
-        with open(NOME_ARQUIVO, 'w', encoding='utf-8') as file:
-            # ensure_ascii=False para exibir caracteres especiais (como emojis) corretamente
-            # indent=4 para formatar o JSON de forma legível (com 4 espaços de indentação)
-            json.dump(tarefas, file, ensure_ascii=False, indent=4)
-        print("tarefas salvas com sucesso!")
-    except IOError: # Captura erros de entrada/saída (problemas com o arquivo)
-        print("Erro ao salvar as tarefas: problema com o arquivo.")
+        if not self.tarefas:
+            return # Sai da função se não houver tarefas
 
-def carregar_tarefas():
-    """Carrega as tarefas de um arquivo JSON para a lista."""
-    global tarefas_global
-    # É necessário expressar 'global' porque vamos reatribuir a lista 'tarefas-global'
+        try:
+            num_tarefa = int(input("Digite o NÚMERO da tarefa que deseja marcar como CONCLUÍDA: "))
+            
+            # Ajusta o número para o índice da lista (usuário digita 1, índice é 0)
+            indice_real = num_tarefa - 1 
 
-    if not os.path.exists(NOME_ARQUIVO):
-        print("Nenhum arquivo de tarefas encontrado. Iniciando com lista vazia...\n")
-        tarefas_global = [] # Garante que a lista esteja vazia se o arquivo não existir
-        return
+            if 0 <= indice_real < len(self.tarefas):
+                self.tarefas[indice_real].concluida = True # Acessa atributo do objeto Tarefa
+                print(f"Tarefa '{self.tarefas[indice_real].descricao}' marcada como CONCLUÍDA! ✅")
+                self._salvar_tarefas() # Salva automaticamente após modificar
+            else:
+                print("Número de tarefa inválido. Tente novamente.")
+        except ValueError:
+            print("Entrada inválida. Por favor, digite um número.")
 
-    try:
-        with open(NOME_ARQUIVO, 'r', encoding='utf-8') as file:
-            tarefas_global = json.load(file)
-        print("tarefas carregadas com sucesso!")
-    except json.JSONDecodeError: # Erro se o arquivo JSON estiver mal formatado
-        print("Erro ao decodificar o arquivo de tarefas. O arquivo pode estar corrompido.")
-        tarefas_global = [] # Reseta as tarefas para evitar problemas
-    except IOError: # Captura erros de entrada/saída
-        print("Erro ao carregar as tarefas.")
-        tarefas_global = [] # Reseta as tarefas por erro de acesso ao arquivo
+    def remover_tarefa(self):
+        """Permite ao usuário remover uma tarefa existente."""
+        self.ver_tarefas() # Chama o método da própria instância
 
+        if not self.tarefas:
+            return # Sai da função se não houver tarefas
+
+        try:
+            num_tarefa = int(input("Digite o NÚMERO da tarefa que deseja REMOVER: "))
+            indice_real = num_tarefa - 1 
+
+            if 0 <= indice_real < len(self.tarefas):
+                tarefa_removida = self.tarefas.pop(indice_real)
+                print(f"Tarefa '{tarefa_removida.descricao}' (ID: {tarefa_removida.id}) removida com sucesso! 🗑️")
+                self._salvar_tarefas() # Salva automaticamente após remover
+            else:
+                print("Número de tarefa inválido. Tente novamente.")
+        except ValueError:
+            print("Entrada inválida. Por favor, digite um número.")
+
+# --- Função Principal do Menu ---
 def menu_principal():
-    """Exibe o menu principal e gerencia as opções do usuário."""
+    gerenciador = GerenciadorDeTarefas() # Cria uma instância do GerenciadorDeTarefas
+
     while True:
-        print("--- GERENCIADOR DE tarefas ---")
-        print("1. Adicionar Tarefa")
+        print("\n--- Gerenciador de Tarefas ---")
+        print("1. Adicionar tarefa")
         print("2. Ver tarefas")
-        print("3. Marcar Tarefa como Concluída")
-        print("4. Remover Tarefa")
-        print("5. Salvar tarefas")
-        print("6. Carregar tarefas")
-        print("7. Sair")
+        print("3. Marcar tarefa como concluída")
+        print("4. Remover tarefa")
+        print("5. Sair")
         print("----------------------------")
 
         opcao = input("Escolha uma opção: ")
 
         if opcao == '1':
-            adicionar_tarefa()
+            gerenciador.adicionar_tarefa() # Chama o método da instância
         elif opcao == '2':
-            ver_tarefas()
+            gerenciador.ver_tarefas() # Chama o método da instância
         elif opcao == '3':
-            marcar_tarefa_concluida()
+            gerenciador.marcar_tarefa_concluida() # Chama o método da instância
         elif opcao == '4':
-            remover_tarefa()
+            gerenciador.remover_tarefa() # Chama o método da instância
         elif opcao == '5':
-            salvar_tarefas(tarefas_global)
-        elif opcao == '6':
-            carregar_tarefas()
-        elif opcao == '7':
-            print("Saindo do Gerenciador de tarefas. Até mais!")
+            print("Saindo do gerenciador de tarefas. Até mais!")
             break
         else:
-            print("Opção inválida. Por favor, escolha uma opção de 1 a 7.")
+            print("Opção inválida. Por favor, escolha uma opção entre 1 e 5.")
 
+# Executa o menu principal se o script for executado diretamente
 if __name__ == "__main__":
-    carregar_tarefas()
     menu_principal()
